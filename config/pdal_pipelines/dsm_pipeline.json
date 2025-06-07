@@ -1,0 +1,13 @@
+{{
+    "pipeline": [
+      "{in_laz}",
+      {{
+        "type": "writers.gdal",
+        "filename": "{out_tif}",
+        "gdaldriver": "GTiff",
+        "resolution": 2.0,
+        "output_type": "max",
+        "nodata": -9999
+      }}
+    ]
+  }}

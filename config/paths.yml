@@ -1,0 +1,12 @@
+# config/paths.yml
+raw_laz: data/raw/tiles/laz
+raw_sat: data/raw/tiles/sat
+raw_meta: data/raw/metadata
+
+dtm_dir: data/derived/dtm
+dsm_dir: data/derived/dsm
+chm_dir: data/derived/chm
+
+hill_dir: data/derived/hillshade
+
+pdal_tpl_dir: config/pdal_pipelines

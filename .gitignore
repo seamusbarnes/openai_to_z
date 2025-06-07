@@ -62,3 +62,6 @@ Thumbs.db
 ######################################################################
 client_secrets.json
 mycreds.txt
+
+## Other git repos within mine that i dont want to track
+papers/2023Kokalj/RVT_py/*
