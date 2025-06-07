@@ -22,6 +22,11 @@ paths:
   # path to pdal pipelines
   pdal_pipelines: config/pdal_pipelines
 
+  # RVT_py example jupyter notebooks
+  example_notebooks:
+    rvt_default: notebooks/rvt_py_examples/rvt_default_example.ipynb
+    rvt_vis: notebooks/rvt_py_examples/rvt_vis_example.ipynb
+
 # dataset metadata
 dataset:
   doi: 10.3334/ORNLDAAC/1644
