@@ -7,13 +7,16 @@ import yaml
 import earthaccess
 import logging
 
-def authenticate_earthaccess():
+def authenticate_earthaccess(verbose=True):
     """
     Authenticate with earthaccess and print the result.
     """
-    print("[io] Authenticating with earthaccess...")
-    auth = earthaccess.login()
-    print(f"[io] Authenticated: {auth.authenticated}")
+    if verbose:
+        print("[io] Authenticating with earthaccess...")
+        auth = earthaccess.login()
+        print(f"[io] Authenticated: {auth.authenticated}")
+    else:
+        auth = earthaccess.login()
     return auth.authenticated
 
 def load_paths_yaml(path_to_yaml, verbose=False):
@@ -68,7 +71,12 @@ def download_earthaccess_dataset_csv(concept_id, dest, overwrite=False):
     print(f"[io] CSV downloaded: {downloaded_paths}")
     return downloaded_paths
 
-def fetch_laz_file(filename, dest_dir, verbose=True, chunk_timeout=5, overwrite=False):
+def fetch_laz_file(
+        filename,
+        dest_dir,
+        verbose=True,
+        chunk_timeout=5,
+        overwrite=False):
     """
     Download a LAZ file into dest_dir, if it doesn't already exist.
     """
