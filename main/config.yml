@@ -19,6 +19,9 @@ paths:
     raw: data/example/raw
     processed: data/example/processed
 
+  # path to dataset csv
+  dataset_csv: data/metadata
+
   # path to pdal pipelines
   pdal_pipelines: config/pdal_pipelines
 
@@ -31,6 +34,8 @@ paths:
 dataset:
   doi: 10.3334/ORNLDAAC/1644
   tile_base_url: https://daac.ornl.gov/daacdata/cms/LiDAR_Forest_Inventory_Brazil/data/
+  concept_id: C2398128915-ORNL_CLOUD
+  csv_filename: cms_brazil_lidar_tile_inventory.csv
 
 # esri metadata
 esri_url: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export

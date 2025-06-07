@@ -12,3 +12,5 @@ dependencies:
   - gdal
   - pdal
   - laspy
+  - earthaccess
+  - ipykernel

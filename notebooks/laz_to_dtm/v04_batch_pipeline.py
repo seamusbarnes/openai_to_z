@@ -30,10 +30,10 @@ SRC = os.path.join(
 if SRC not in sys.path:
     sys.path.insert(0, SRC)
 
-from lidar_utils import io as utils_io
-from lidar_utils import satellite
-from lidar_utils import lidar
-from lidar_utils import raster
+from project_utils import io as utils_io
+from project_utils import satellite
+from project_utils import lidar
+from project_utils import raster
 
 # auto-reload any module that changes on disk
 get_ipython().run_line_magic('load_ext', 'autoreload')
@@ -219,7 +219,7 @@ print(f"\nResult paths for {row['filename']}:\n{out}")
 # In[41]:
 
 
-from lidar_utils import vis
+from project_utils import vis
 
 # Visualize the last processed tile
 print("\nVisualizing results of last processed tile...")
