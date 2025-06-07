@@ -1,0 +1,14 @@
+name: openai_to_z
+channels:
+  - rvtpy
+  - conda-forge
+dependencies:
+  - python=3.10 # Compatible with all current geo packages
+  - rvt_py # Will always be sourced from rvtpy channel
+  - numpy
+  - pandas
+  - matplotlib
+  - rasterio
+  - gdal
+  - pdal
+  - laspy

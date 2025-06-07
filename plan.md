@@ -40,8 +40,6 @@ Directory structure:
 │       └── dtm_pipeline.json
 ├── csf_ground.tif
 ├── data
-│   ├── 2025-06-03-6c6c34
-│   │   └── cms_brazil_lidar_tile_inventory.csv
 │   ├── cms_brazil_lidar_tile_inventory.csv
 │   ├── derived
 │   │   ├── chm
@@ -51,6 +49,10 @@ Directory structure:
 │   └── raw
 │       ├── metadata
 │       └── tiles
+├── main
+│   ├── config.yml
+│   ├── environment.yml
+│   └── main.py
 ├── mycreds.txt
 ├── notebooks
 │   ├── 2018deSouza_create_geotiff.ipynb
@@ -83,8 +85,7 @@ Directory structure:
         ├── setup.py
         └── vis.py
 
-21 directories, 32 files
-
+21 directories, 34 files
 ```
 
-How do we come up with a minimalistic workflow to so
+How do we come up with a minimalistic workflow to so I can do this from a main.py file, with CONFIG for all the different directory paths, and then point to src/lidar_utils/\*.py util files?
