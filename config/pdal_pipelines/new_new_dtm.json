@@ -1,0 +1,23 @@
+{{
+  "pipeline": [
+    {{
+      "type": "readers.las",
+      "filename": "{in_laz}"
+    }},
+    {{
+      "type": "filters.smrf"
+    }},
+    {{
+      "type": "filters.range",
+      "limits": "Classification[2:2]"
+    }},
+    {{
+      "type": "writers.gdal",
+      "filename": "{out_tif}",
+      "gdaldriver": "GTiff",
+      "resolution": 2.0,
+      "output_type": "min",
+      "nodata": -9999
+    }}
+  ]
+}}
