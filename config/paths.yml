@@ -1,63 +1,12 @@
-# main/config.yml
+# config/paths.yml
 
-paths:
-  # paths to unprocessed data
-  raw:
-    laz: data/raw/tiles/laz
-    sat: data/raw/tiles/sat
-    meta: data/raw/tiles/metadata
+path_to_laz: data/raw/laz
+path_to_sat: data/raw/sat
 
-  # paths to processed data
-  processed:
-    dtm: data/processed/dtm
-    dsm: data/processed/dsm
-    chm: data/processed/chm
-    vis: data/processed/visualisations
+path_to_dtm: data/processed/dtm
+path_to_vis: data/processed/vis
 
-  # path to example data
-  example:
-    raw: data/example/raw
-    processed: data/example/processed
+path_to_metadata: data/metadata
+path_to_examples: data/example
 
-  # path to dataset csv
-  dataset_csv: data/metadata
-
-  # path to pdal pipelines
-  pdal_pipelines: config/pdal_pipelines
-
-  # RVT_py example jupyter notebooks
-  example_notebooks:
-    rvt_default: notebooks/rvt_py_examples/rvt_default_example.ipynb
-    rvt_vis: notebooks/rvt_py_examples/rvt_vis_example.ipynb
-
-# dataset metadata
-dataset:
-  doi: 10.3334/ORNLDAAC/1644
-  tile_base_url: https://daac.ornl.gov/daacdata/cms/LiDAR_Forest_Inventory_Brazil/data/
-  concept_id: C2398128915-ORNL_CLOUD
-  csv_filename: cms_brazil_lidar_tile_inventory.csv
-
-# esri metadata
-esri_url: https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export
-
-# example files
-example_filenames:
-  rvt:
-    dem: TM1_564_146.tif # original "unprocessed" digital elevation model
-    slope: TM1_564_146_slope.tif # processed slope visualisation
-    hillshade: TM1_564_146_hilshade.tif # processed hillshade visualisation
-    miltihillshade: TM1_564_146_multi_hillshade.tif # processed multiple direction hillshade visualisation
-
-    slrm: TM1_564_146_slrm.tif # processed simple local relief model visualisation
-    msrm: TM1_564_146_msrm.tif # processed multi-scale relief model visualisation
-
-    svr: TM1_564_146_svf.tif # processed sky-view factor visualisation
-    asvf: TM1_564_146_asvf.tif # processed anisotropic sky-view factor
-    pos_opns: TM1_564_146_pos_opns.tif # processed positive openness visualisation
-    neg_opns: TM1_564_146_neg_opns.tif # processed negative openness visualisation
-    ld: TM1_564_146_local_dominance.tif # processed local dominance visualisation
-    si: TM1_564_146_sky_illumination.tif # processed sky illumination visualisation
-    mstp: TM1_564_146_MSTP.tif # processed multi-scale topographic position
-
-  # example ORNL DAAC .laz file
-  laz_tile: ANT_A01_2011_laz_0.laz
+path_to_pdal_templates: config/pdal_pipeline_templates
