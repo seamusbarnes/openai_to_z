@@ -5,7 +5,7 @@
 
 ## Current Focus (What am I doing right now?)
 
-- Creating VAT images, they look OK so far.
+- "Productionize" code so it can be run from the terminal, with a config file and pdal pipeline_templates, and generate DTMs (from which VATs can easily be made).
 - Working on notebook [Searching the Amazon with Remote Sensing 🛰️ and AI 🤖](https://www.kaggle.com/code/seamusbarnes/search-the-amazon-with-remote-sensing-and-ai/edit).
 
 ## Next Steps
@@ -32,6 +32,10 @@
 
 ## Development Log
 
+- _2025-06-11 (Wednesday)_ |
+  1. Amended README.md to add introductoru paragraph and "Repo Structure" and "Top-Level Pipeline description" sections. "Quick Start" with instructions of how to install the conda environment and run `main.py` still need to be completed.
+  2. Wrote "Top-level Pipeline description". Analysed point-clound metadata (ground classification percentage, point density, classification 2 point density) and added to "Top-level Pipeline description".
+  3. Beginning refactor to "production" code ono branch refactor-pipeline.
 - _2025-06-10 (Tuesday)_ |
   1. Refactored lidar.laz_to_dtm so that it is robust to invalid json (pipeline definition template) which it can then convert to valid json for the pdal pipeline.
   2. Amended pdal pipeline definition so it includes smrf (simple morphological filter), Classification[2:2], and gdaldriver GTiff output. Also edited `notebooks/rvt_py_examples/rvt_default_example.ipynb` so it applies the different visualisations to the "correctly processed" DTM.

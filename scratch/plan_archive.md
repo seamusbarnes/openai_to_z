@@ -1,3 +1,5 @@
+# NO LONGER ACTIVE! Keeping as archive for the time being.
+
 # Plan For How To Solve the Next Few Problems
 
 ## Single Goal

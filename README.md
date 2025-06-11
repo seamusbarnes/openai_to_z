@@ -2,9 +2,9 @@
 
 This repo can be used to download .laz files from the ORNL DAAC dataset [LiDAR Surveys over Selected Forest Research Sites, Brazilian Amazon, 2008-2018](https://daac.ornl.gov/CMS/guides/LiDAR_Forest_Inventory_Brazil.html) and run a pipeline to process them into DTMs using [PDAL (Point Data Abstraction Library)](https://pdal.io/en/stable/).
 
-## Quick start
+## Quick Start
 
-## Repo structure
+## Repo Structure
 
 - data
 
