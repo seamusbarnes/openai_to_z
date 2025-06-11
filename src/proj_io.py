@@ -6,6 +6,8 @@ import os
 import yaml
 import earthaccess
 import logging
+from typing import Optional, Union
+from tqdm import tqdm
 
 def authenticate_earthaccess(verbose=True):
     """
@@ -72,34 +74,88 @@ def download_earthaccess_dataset_csv(concept_id, dest, overwrite=False):
     return downloaded_paths
 
 def fetch_laz_file(
-        filename,
-        dest_dir,
-        verbose=True,
-        chunk_timeout=5,
-        overwrite=False):
+    filename: str,
+    dest_dir: Union[str, pathlib.Path],
+    verbose: bool = True,
+    chunk_timeout: int = 5,
+    overwrite: bool = False,
+    token: Optional[str] = None,
+    show_progress: bool = False,
+) -> Optional[pathlib.Path]:
     """
     Download a LAZ file into dest_dir, if it doesn't already exist.
+
+    Args:
+        filename: Name of the file to download.
+        dest_dir: Directory to save the file.
+        verbose: Print status messages.
+        chunk_timeout: Timeout (seconds) for each chunk.
+        overwrite: If True, overwrite the file if it exists.
+        token: Bearer token for authenticated requests.
+        show_progress: If True, display tqdm progress bar.
+            **Warning:** Enabling this adds one extra HEAD request to the server
+            to get the file size (for progress reporting). If minimizing API calls is
+            important (to avoid throttling), set show_progress=False to download
+            without the size info, and only one GET request will be made.
+
+    Returns:
+        Path to downloaded file, or None on failure.
     """
-    BASE_URL = "https://daac.ornl.gov/daacdata/cms/LiDAR_Forest_Inventory_Brazil/data/"
+    BASE_URL = "https://daac.ornl.gov/daacdata/cms/LiDAR_Forest_Inventory_Brazil/data"
+    dest_dir = pathlib.Path(dest_dir)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest_path = dest_dir / filename
     url = f"{BASE_URL}/{filename}"
-    os.makedirs(dest_dir, exist_ok=True)
-    dest_path = pathlib.Path(dest_dir) / filename
+    headers = {}
+    if token:
+        headers["Authorization"] = f"Bearer {token}"
+
+    # Skip redundant download
     if dest_path.exists() and not overwrite:
         if verbose:
             print(f"[io] {filename} already exists in {dest_dir}, skipping download.")
         return dest_path
 
-    print(f"[io] Downloading {filename}...")
+    if verbose:
+        print(f"[io] Downloading {filename}...")
+
+    # Get file size for progress bar, if requested
+    total = None
+    if show_progress:
+        try:
+            resp = requests.head(url, headers=headers, timeout=5)
+            resp.raise_for_status()
+            total = int(resp.headers.get('Content-Length', 0))
+        except Exception:
+            total = None  # Proceed without total file size
+
     try:
-        with requests.get(url, stream=True, timeout=(5, chunk_timeout)) as r:
+        with requests.get(url, stream=True, headers=headers, timeout=(5, chunk_timeout)) as r:
             r.raise_for_status()
             with open(dest_path, "wb") as f:
+                # Only show tqdm if show_progress is True and total is available
+                use_tqdm = show_progress and (total is not None)
+                progress = tqdm(
+                    total=total, unit='B', unit_scale=True, 
+                    disable=not use_tqdm, desc=filename
+                )
                 for chunk in r.iter_content(chunk_size=8192):
                     if chunk:
                         f.write(chunk)
+                        if use_tqdm:
+                            progress.update(len(chunk))
+                if use_tqdm:
+                    progress.close()
+
         if verbose:
             print(f"[io] Downloaded {filename} to {dest_path}")
         return dest_path
+    except (KeyboardInterrupt, SystemExit):
+        if dest_path.exists():
+            dest_path.unlink()
+        raise
     except Exception as exc:
+        if dest_path.exists():
+            dest_path.unlink()
         print(f"[io] Failed to download {filename}: {exc}")
         return None

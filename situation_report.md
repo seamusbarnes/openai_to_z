@@ -36,6 +36,7 @@
   1. Amended README.md to add introductoru paragraph and "Repo Structure" and "Top-Level Pipeline description" sections. "Quick Start" with instructions of how to install the conda environment and run `main.py` still need to be completed.
   2. Wrote "Top-level Pipeline description". Analysed point-clound metadata (ground classification percentage, point density, classification 2 point density) and added to "Top-level Pipeline description".
   3. Beginning refactor to "production" code ono branch refactor-pipeline.
+  4. Completed basic refactor of main.py and associated src files, config file and pdal pipeline.
 - _2025-06-10 (Tuesday)_ |
   1. Refactored lidar.laz_to_dtm so that it is robust to invalid json (pipeline definition template) which it can then convert to valid json for the pdal pipeline.
   2. Amended pdal pipeline definition so it includes smrf (simple morphological filter), Classification[2:2], and gdaldriver GTiff output. Also edited `notebooks/rvt_py_examples/rvt_default_example.ipynb` so it applies the different visualisations to the "correctly processed" DTM.

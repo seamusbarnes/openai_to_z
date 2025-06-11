@@ -1,0 +1,18 @@
+# config/config.yml
+
+path_to_laz_raw: data/raw/laz
+path_to_laz_processed: data/processed/laz
+path_to_sat: data/raw/sat
+
+path_to_dtm: data/processed/dtm
+path_to_vis: data/processed/vis
+
+path_to_metadata: data/metadata
+path_to_examples: data/example
+
+dataset_inventory_filename: cms_brazil_lidar_tile_inventory.csv
+dataset_metadata_filename: cms_brazil_lidar_tile_metadata.csv
+
+path_to_pdal_templates: config/pdal_pipeline_templates
+
+pdal_pipeline_filename: generate_dtm.json

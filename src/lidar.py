@@ -7,6 +7,16 @@ import pdal
 import laspy
 from collections import Counter
 import numpy as np
+from typing import Dict, Any, List, Union
+import time
+from pathlib import Path
+
+def pt(msg=None):
+    current_time = time.strftime("%H:%M:%S")
+    if msg:
+        print(f"{current_time}: {msg}")
+    else:
+        print(current_time)
 
 def tile_bounds(laz_path, res=2.0):
     """
@@ -331,3 +341,126 @@ def laz_to_dtm(
         print(f"[laz_to_dtm] Output DTM file created at: {dtm_path}")
 
     return dtm_path
+
+def print_metadata_table(
+    laz_path: str,
+    tile_area_m2: float
+) -> None:
+    """
+    Fetches and prints LiDAR metadata in a formatted table.
+
+    Args:
+        laz_path (str): Path to .laz file.
+        tile_area_m2 (float): Tile area in square meters.
+        lidar: An object with a get_metadata method.
+    """
+    print("Printing metadata...\n")
+    metadata: Dict[str, Any] = get_metadata(laz_path, tile_area_m2)
+    
+    n_points_total: int = metadata['n_points_total']
+    tile_area_m2: float = metadata['tile_area_m2']
+    class_2_count: int = metadata['class_2_count']
+    class_2_pct: float = metadata['class_2_pct'] * 100
+
+    point_density: float = n_points_total / tile_area_m2
+    class_2_density: float = class_2_count / tile_area_m2
+
+    # Table Header
+    print(f"{'Metric':<38} {'Value':>20}")
+    print("-" * 60)
+
+    print(f"{'Total number of points:':<38} {n_points_total:>20,}")
+    print(f"{'Tile area:':<38} {tile_area_m2 * 1e-6:>17.2f} km\u00b2")
+    print(f"{'Classification 2 point percentage:':<38} {class_2_pct:>19.2f} %")
+    print(f"{'Point density:':<38} {point_density:>19.2f} pt/m\u00b2")
+    print(f"{'Classification 2 point density:':<38} {class_2_density:>19.2f} pt/m\u00b2")
+
+def run_pdal_pipeline(
+    input_path: Union[str, Path],
+    output_dir: Union[str, Path],
+    template_path: Union[str, Path],
+    verbose: int = 0
+) -> str:
+    """
+    Run a PDAL pipeline from a template using a .laz input file.
+    The template must use {in_laz} and {out_tif} placeholders.
+    The output .tif will be named as:
+        basename(input_path without extension) + '_' + basename(template_path without extension) + '.tif'
+
+    Args:
+        input_path (str): Path to input .laz file.
+        output_dir (str): Output directory for the .tif.
+        template_path (str): Path to template JSON.
+        verbose (int): Verbosity.
+
+    Returns:
+        str: The output .tif path.
+
+    Raises:
+        TypeError, FileNotFoundError, ValueError, RuntimeError
+
+    """
+
+    # Convert all input paths to string for downstream use
+    input_path = str(input_path)
+    output_dir = str(output_dir)
+    template_path = str(template_path)
+    
+    # --- TYPE CHECKING ---
+    if not isinstance(input_path, str):
+        raise TypeError(f"input_path must be a string, got {type(input_path)}")
+    if not isinstance(output_dir, str):
+        raise TypeError(f"output_dir must be a string, got {type(output_dir)}")
+    if not isinstance(template_path, str):
+        raise TypeError(f"template_path must be a string, got {type(template_path)}")
+    if not isinstance(verbose, int):
+        raise TypeError(f"verbose must be int, got {type(verbose)}")
+    # --- END TYPE CHECKING ---
+
+    pt("Checking input and template files")
+    if not os.path.isfile(input_path):
+        raise FileNotFoundError(f"Input .laz file not found: {input_path}")
+    if not os.path.isfile(template_path):
+        raise FileNotFoundError(f"Pipeline template not found: {template_path}")
+
+    # Determine output .tif filename
+    input_name = os.path.splitext(os.path.basename(input_path))[0]
+    template_name = os.path.splitext(os.path.basename(template_path))[0]
+    out_filename = f"{input_name}_{template_name}.tif"
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+    out_tif_path = os.path.join(output_dir, out_filename)
+
+    pt("Reading and substituting pipeline template")
+    with open(template_path, 'r', encoding='utf-8') as f:
+        tpl = f.read()
+    try:
+        pipeline_filled = tpl.format(in_laz=input_path, out_tif=out_tif_path)
+    except Exception as e:
+        raise ValueError(f"Error formatting template: {e}")
+
+    pt(f"Filled pipeline definition:\n{pipeline_filled}")
+
+    try:
+        pipeline_obj = json.loads(pipeline_filled)
+        pt("Pipeline is valid JSON after substitution")
+    except Exception as e:
+        raise ValueError(f"Pipeline is not valid JSON after substitution: {e}")
+
+    if isinstance(pipeline_obj, dict) and "pipeline" in pipeline_obj:
+        pdal_pipe = pipeline_obj["pipeline"]
+    elif isinstance(pipeline_obj, list):
+        pdal_pipe = pipeline_obj
+    else:
+        raise ValueError("Pipeline template must be a list or a dict with a 'pipeline' key.")
+
+    pt("Running PDAL pipeline")
+    pipe = pdal.Pipeline(json.dumps(pdal_pipe))
+    count = pipe.execute()
+    if verbose:
+        print(f"Processed {count} points ({input_path})")
+
+    if not os.path.isfile(out_tif_path):
+        raise RuntimeError(f"Expected output file not created: {out_tif_path}")
+
+    return out_tif_path
