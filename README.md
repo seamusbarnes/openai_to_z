@@ -35,3 +35,70 @@ This repo can be used to download .laz files from the ORNL DAAC dataset [LiDAR S
     - `main.py`: CLI executable script for running pipeline
 - `environment.yml`: conda environment package dependencies
 - `README.md`
+
+## Top-level Pipeline description
+
+0. .laz point-cloud metadata:
+   - Classification 2 (ground) points are a small percentage of all points (mean = 3.2 %; std. = 4.7 %)
+   - All points point density is high (mean = 27.9 points per m2; std. = 34.1 points per m2)
+   - Classification 2 point density is low (mean = 0.6 classification 2 points per m2; std. = 0.7 classification 2 points per m2
+1. Process .laz file to DTM using the following pdil pipelines:
+
+   - Denoise
+
+   ```json
+   {
+     "pipeline": [
+       {
+         "type": "readers.las",
+         "filename": "{in_laz}"
+       },
+       {
+         "type": "filters.outlier",
+         "method": "statistical",
+         "mean_k": 8,
+         "multiplier": 3.0
+       },
+       {
+         "type": "filters.smrf",
+         "ignore": "Classification[7:7]"
+       },
+       {
+         "type": "filters.expression",
+         "expression": "Classification == 2"
+       },
+       {
+         "type": "writers.copc",
+         "filename": "{out_laz}"
+       }
+     ]
+   }
+   ```
+
+   - Generate DTM
+
+   ```json
+   {
+     "pipeline": [
+       {
+         "type": "readers.las",
+         "filename": "{in_laz}"
+       },
+       {
+         "filename": "{out_tif}",
+         "gdaldriver": "GTiff",
+         "output_type": "min",
+         "resolution": "2.0",
+         "type": "writers.gdal"
+       }
+     ]
+   }
+   ```
+
+2. Post-processing
+   - Normalise DEM for colour image (remove outliers below 2nd percentile and above 98th percentile)
+   - Generate hillshade
+3. Results: Normalised DEM and hillshade visualisation
+   - Example DTM: `SFX_A01_2012_laz_1.laz_denoised_tutorial_denoise_ground.tif`
+   - Example DTM (post-processed): `example_dtm_highres.png`
+   - Example hillshade: `example_hillshade_highres.png`
