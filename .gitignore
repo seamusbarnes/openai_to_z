@@ -62,6 +62,7 @@ Thumbs.db
 ######################################################################
 client_secrets.json
 mycreds.txt
+earthdata_token.txt
 
 ## Other git repos within mine that i dont want to track
 papers/

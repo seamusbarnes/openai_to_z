@@ -54,6 +54,11 @@ if __name__ == "__main__":
         "--print-metadata", action="store_true",
         help="Print tile and point-cloud metadata: area, number of counts, all-point density, classification-2-point density"
     )
+    parser.add_argument(
+        "--tile-name",
+        default=None,
+        help="Specify specific tile name (optional)"
+    )
     args = parser.parse_args()
 
     # GET CONFIG DETAILS
@@ -61,7 +66,6 @@ if __name__ == "__main__":
 
     # SOME VARIABLES
     CWD = os.getcwd()
-    EARTHACCESS_BEARER_TOKEN = os.environ.get('EARTHDATA_BEARER_TOKEN')
     PATH_TO_DATASET_METADATA = os.path.join(
         CWD,
         cfg["path_to_metadata"],
@@ -78,24 +82,46 @@ if __name__ == "__main__":
     PDAL_PIPELINE_FILENAME = cfg["pdal_pipeline_filename"]
     PIPELINE_PATH = os.path.join(CWD, PATH_TO_PDAL_TEMPLATE_DIR, PDAL_PIPELINE_FILENAME)
 
+    # GET EARTHDATA BEARER TOKEN
+    EARTHDATA_BEARER_TOKEN = proj_io.get_earthdata_token()
+
 
     # AUTHENTICATE EARTHACCESES
-    proj_io.authenticate_earthaccess()
+    # proj_io.authenticate_earthaccess()
 
     # import dataset metadata into pandas dataframe
     df = pd.read_csv(PATH_TO_DATASET_METADATA)
 
     for index in range(args.n_tiles):
-        row = df.iloc[index]
+
+        # if user has chosen a specific tile-name, disregate n-tiles and process that specific tile
+        if args.tile_name:
+            print(f"User specified tile name: {args.tile_name}")
+            row = df[df["filename"] == args.tile_name]
+            if len(row) == 0:
+                raise ValueError(f"Tile name '{args.tile_name}' not found in metadata!")
+            row = row.iloc[0]
+        else:
+            row = df.iloc[index]
         filename = row["filename"]
 
         pt(f"Processing row: {index+1}/{len(df)}; Filename: {filename}")
 
-        laz_path = proj_io.fetch_laz_file(
+        # laz_path = proj_io.fetch_laz_file(
+        #     filename,
+        #     LAZ_RAW_DIR,
+        #     overwrite=False,
+        #     show_progress=False,
+        #     token=EARTHDATA_BEARER_TOKEN,
+        #     verbose=True
+        # )
+
+        laz_path = proj_io.fetch_laz_file_earthaccess(
             filename,
             LAZ_RAW_DIR,
-            overwrite=False,
-            show_progress=False
+            overwrite=True,
+            show_progress=False,
+            verbose=True
         )
         if args.show_sat:
             satellite.show_sat_image(df, filename,save_path=SAT_RAW_DIR, overwrite=True)
@@ -109,3 +135,6 @@ if __name__ == "__main__":
             PIPELINE_PATH,
             verbose=2
         )
+
+        if args.tile_name:
+            break

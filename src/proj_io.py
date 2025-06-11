@@ -8,6 +8,20 @@ import earthaccess
 import logging
 from typing import Optional, Union
 from tqdm import tqdm
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
+def get_earthdata_token():
+    # # Try env var first
+    # token = os.environ.get('EARTHDATA_BEARER_TOKEN')
+    # if token:
+    #     return token
+    # # If not set, try file
+    try:
+        with open('earthdata_token.txt', 'r') as f:
+            return f.read().strip()
+    except FileNotFoundError:
+        raise RuntimeError("No EARTHDATA_BEARER_TOKEN env var or earthdata_token.txt file found!")
 
 def authenticate_earthaccess(verbose=True):
     """
@@ -110,6 +124,13 @@ def fetch_laz_file(
     if token:
         headers["Authorization"] = f"Bearer {token}"
 
+    # Print **header** and **token** status for debug purposes
+    if verbose:
+        print(f"[io][DEBUG] Token received: {'YES' if token else 'NO'}")
+        if token:
+            print(f"[io][DEBUG] Token start: {token[:10]}... len={len(token)}")
+        print(f"[io][DEBUG] Request headers for {filename}: {headers}")
+
     # Skip redundant download
     if dest_path.exists() and not overwrite:
         if verbose:
@@ -158,4 +179,64 @@ def fetch_laz_file(
         if dest_path.exists():
             dest_path.unlink()
         print(f"[io] Failed to download {filename}: {exc}")
+        return None
+    
+def fetch_laz_file_earthaccess(
+    filename: str,
+    dest_dir: Union[str, pathlib.Path],
+    verbose: bool = True,
+    overwrite: bool = False,
+    show_progress: bool = False,
+) -> Optional[pathlib.Path]:
+    """
+    Download a LAZ file into dest_dir, using earthaccess for authentication.
+
+    Args:
+        filename: Name of the file to download (e.g. 'FST_A01a_2015_laz_2.laz').
+        dest_dir: Directory to save the file.
+        verbose: Print status messages.
+        overwrite: If True, overwrite the file if it exists.
+        show_progress: If True, show tqdm progress (handled by earthaccess).
+
+    Returns:
+        Path to downloaded file, or None on failure.
+    """
+    BASE_URL = "https://daac.ornl.gov/daacdata/cms/LiDAR_Forest_Inventory_Brazil/data"
+    dest_dir = pathlib.Path(dest_dir)
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest_path = dest_dir / filename
+    url = f"{BASE_URL}/{filename}"
+
+    # Check for existing file
+    if dest_path.exists() and not overwrite:
+        if verbose:
+            print(f"[io] {filename} already exists in {dest_dir}, skipping download.")
+        return dest_path
+
+    if verbose:
+        print(f"[io] Downloading {filename} using earthaccess...")
+
+    try:
+        # Authenticate (relies on env variables or cached token)
+        auth = earthaccess.login()
+        if not auth.authenticated:
+            print("[io][ERROR] Earthaccess authentication failed.")
+            return None
+
+        # Download the URL to the desired location
+        downloaded_paths = earthaccess.download(url, local_path=dest_dir)
+        # earthaccess.download always returns a list, even if one file
+        if downloaded_paths and pathlib.Path(downloaded_paths[0]).exists():
+            if verbose:
+                print(f"[io] Downloaded {filename} to {downloaded_paths[0]}")
+            return pathlib.Path(downloaded_paths[0])
+        else:
+            if verbose:
+                print(f"[io][ERROR] File not downloaded: {filename}")
+            return None
+
+    except Exception as exc:
+        if dest_path.exists():
+            dest_path.unlink()
+        print(f"[io][ERROR] Failed to download {filename}: {exc}")
         return None
