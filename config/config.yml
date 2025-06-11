@@ -15,4 +15,4 @@ dataset_metadata_filename: cms_brazil_lidar_tile_metadata.csv
 
 path_to_pdal_templates: config/pdal_pipeline_templates
 
-pdal_pipeline_filename: generate_dtm.json
+pdal_pipeline_filename: fnands.json
