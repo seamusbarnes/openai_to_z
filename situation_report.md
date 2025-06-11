@@ -5,6 +5,7 @@
 
 ## Current Focus (What am I doing right now?)
 
+- Creating VAT images, they look OK so far.
 - Working on notebook [Searching the Amazon with Remote Sensing 🛰️ and AI 🤖](https://www.kaggle.com/code/seamusbarnes/search-the-amazon-with-remote-sensing-and-ai/edit).
 
 ## Next Steps

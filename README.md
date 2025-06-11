@@ -1,1 +1,37 @@
 # openai_to_z
+
+This repo can be used to download .laz files from the ORNL DAAC dataset [LiDAR Surveys over Selected Forest Research Sites, Brazilian Amazon, 2008-2018](https://daac.ornl.gov/CMS/guides/LiDAR_Forest_Inventory_Brazil.html) and run a pipeline to process them into DTMs using [PDAL (Point Data Abstraction Library)](https://pdal.io/en/stable/).
+
+## Quick start
+
+## Repo structure
+
+- data
+
+  - example
+
+    - `TM1_564_146.tif`: RVT_py example DTM used in example notebook
+    - `TM1_564_146_nodata.tif`: RVT_py example DTM used in example notebook
+    - `sinthetic_dem15_0.50_all.tif`: RVT_py example DTM used in example notebook
+    - `synthetic_dem15_0.50.tif`: RVT_py example DTM used in example notebook
+    - `RIB_A01_2014_laz_2.laz`: tile [fnands](https://www.kaggle.com/fnands) used to generate an example hillshade visualisation. The tile appears to show a square man-made site (~10 m diameter?) and a banked road leading to it
+    - `RIB_A01_2014_laz_2_hillshade.png`: hillshade example made by [fnands](https://www.kaggle.com/fnands)
+
+  - metadata
+
+    - `cms_brazil_lidar_tile_metadata.csv` (metadata for 3,146/3,152 tiles. Each row corresponds to a specific tile. "filename" can be used to download the .laz file. Contains point-cloud metadata (e.g. number of points, number of points in each classification, percentage of poits in each classification, tile area). Also includes tile coordinates and SRS.
+
+  - processed
+    - dir for processed data (DTMs, denoised DTMs)
+  - raw
+    - dir for raw .laz and satellite data
+  - visualisations
+    - dir for visualisations (e.g. hillshade, VAT etc.)
+
+- main
+  - pdal_templates
+    - TEMPLATES
+    - `config.yml`: configuration of full pipeline run, including paths to raw data, processed data, pdal_template data and log data, and filenames of pdal_templates used.
+    - `main.py`: CLI executable script for running pipeline
+- `environment.yml`: conda environment package dependencies
+- `README.md`
