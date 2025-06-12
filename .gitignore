@@ -30,6 +30,8 @@ data/**
 !data/**/*.md
 !data/**/*.txt
 !data/raw/metadata/**/*.csv     # keep lightweight tile indices etc.
+!data/example/
+!data/example/*
 
 # Local caches outside data/
 tile_cache/
@@ -72,3 +74,8 @@ log.txt
 ## Other git repos within mine that i dont want to track
 papers/
 papers/2023Kokalj/RVT_py/
+
+!data/example/
+!data/example/*
+!data/example/*.tif
+!data/example/*.laz
