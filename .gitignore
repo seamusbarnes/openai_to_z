@@ -30,6 +30,8 @@ data/**
 !data/**/*.md
 !data/**/*.txt
 !data/raw/metadata/**/*.csv     # keep lightweight tile indices etc.
+!data/example/
+!data/example/*
 
 # Local caches outside data/
 tile_cache/
