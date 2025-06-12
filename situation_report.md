@@ -29,8 +29,15 @@
   2. [LiDAR and DTM Data from Forested Land Near Manaus, Amazonas, Brazil, 2008](LiDAR and DTM Data from Forested Land Near Manaus, Amazonas, Brazil, 2008).
   3. [CMS: LiDAR Data for Forested Areas in Paragominas, Para, Brazil, 2012-2014](https://daac.ornl.gov/CMS/guides/CMS_Landscapes_Brazil_LiDAR.html). LiDAR AND DTM files
 - (F) Add tye-hints to my utils functions.
+- (F) PDAL pipelines do not have spatialreference entry for writers.gdal. This can be extracted from the metadata for each tile in `df[df["filename"]==filename]["srs"]` but needs to be extracted and added to PDAL pipeline.
 
 ## Development Log
+
+- _2025_06_12 (Thursday)_ |
+
+1. Downloading entire ~120 GB dataset using `robust_downloader.py`
+2. Saved pre-cleanup branch: ARCHIVE-pre-cleanup.
+3. Seriously refactoring cutting out unnecessary files/code etc. from branch origin/refactor-pipeline.
 
 - _2025-06-11 (Wednesday)_ |
   1. Amended README.md to add introductoru paragraph and "Repo Structure" and "Top-Level Pipeline description" sections. "Quick Start" with instructions of how to install the conda environment and run `main.py` still need to be completed.

@@ -1,6 +1,0 @@
-{
-    "pipeline": [
-      { "type": "filters.range", "limits": "Z[0:]" }
-    ]
-  }
-  

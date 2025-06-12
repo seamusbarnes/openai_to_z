@@ -1,200 +1,199 @@
-#!/usr/bin/env python
-# coding: utf-8
+"""
+Analyze percentage of LiDAR tiles with high ground-point classification.
 
-# - **purpose**: 1. Determine what percentage of the tiles in the dataset has have what percentage of ground classified points. 2. Show ESRI satellite data images of tiles with the highest percentage of ground classified points.
-# 
-# - **status**: Working. Getting ESRI satellite images (with `satellite.fetch_esri_from_XXX()`) is brittle and returns server error 500 for small tiles (minimum tile width determined by location, but >250 m is usually safe).
-# 
-# - **next**: None
-# 
-# - **conclusion**: Percent of tiles with ground point % > 5% (10%): 0.14% (0.06%) (425 counts (180 counts))
-
-# In[63]:
-
+- Loads tile inventory and metadata CSVs.
+- Plots histogram and CDF of per-tile ground classification fraction.
+- Calculates fraction and count of tiles over ground-point thresholds.
+- (Optionally) fetches and displays ESRI satellite images for tiles of interest.
+"""
 
 import os
 import pandas as pd
 import numpy as np
-import sys
 import requests
-
 from PIL import Image
 from io import BytesIO
-import pathlib
-
-# compute absolute path to the project root's src/
-sys.path.insert(0, os.path.join(os.getcwd(), "src"))
-
-# import project specific (src/project_utils/...) packages #
-from project_utils import config as proj_config
-from project_utils import io as proj_io
-from project_utils import geo as proj_geo
-from project_utils import lidar as proj_lidar
-from project_utils import raster as proj_raster
-from project_utils import satellite as proj_satellite
-from project_utils import vis as proj_vis
-from project_utils import scratch as proj_scratch
-
-# auto-reload any module that changes on disk
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '')
-# %reload_ext autoreload
-
-
-# In[8]:
-
-
-inventory_name = "cms_brazil_lidar_tile_inventory.csv"
-metadata_name = "cms_brazil_lidar_tile_metadata.csv"
-
-def get_path_to_data(filename):
-    path_to_file = os.path.join(
-        os.getcwd(),
-        "data",
-        "metadata",
-        filename
-    )
-    return path_to_file
-
-path_to_inv = get_path_to_data(inventory_name)
-path_to_meta =  get_path_to_data(metadata_name)
-
-
-# In[23]:
-
-
-df_inv = pd.read_csv(path_to_inv)
-df_meta = pd.read_csv(path_to_meta)
-
-print(f"Length of inventory: {len(df_inv)}")
-print(f"Length of metadata: {len(df_meta)}")
-print("")
-
-print(f"Inventory columns: {df_inv.columns}")
-print(f"Metadata columns: {df_meta.columns}")
-print("")
-
-print(f"Filename of row 0 entry for inventory: {df_inv.iloc[0]['filename']}")
-print(f"Filename of row 0 entry for metadata: {df_meta.iloc[0]['filename']}")
-
-
-# In[25]:
-
-
 import matplotlib.pyplot as plt
+import argparse
 
-plt.hist((df_meta['ground_pct']*100).dropna(), bins=30)
-plt.xlabel('Ground Point Percentage')
-plt.ylabel('Number of Tiles')
-plt.title('Distribution of % Ground Points per Tile')
-plt.show()
+# ---- Config Defaults ----
 
+DEFAULT_CONFIG = {
+    "inventory_csv": "cms_brazil_lidar_tile_inventory.csv",
+    "metadata_csv": "cms_brazil_lidar_tile_metadata.csv",
+    "data_dir": os.path.join(os.getcwd(), "data", "metadata"),
 
-# In[27]:
-
-
-# Drop NaN values for safety
-ground_pcts = (df_meta['ground_pct']*100).dropna()
-
-# Sort values
-sorted_pcts = np.sort(ground_pcts)
-
-# Compute cumulative sum (in terms of counts or percentages)
-cum_counts = np.arange(1, len(sorted_pcts) + 1)
-cum_frac = cum_counts / len(sorted_pcts)
-
-plt.figure(figsize=(8, 5))
-plt.step(sorted_pcts, cum_frac, where='post')
-plt.xlabel('Ground Points Percentage')
-plt.ylabel('Cumulative Fraction of Tiles')
-plt.title('Cumulative Distribution of % Ground Points per Tile')
-plt.grid(True)
-plt.show()
-
-
-# In[112]:
-
-
-for thresh in [5, 10, 20, 30]:
-    pct_above = np.mean(sorted_pcts > thresh)
-    count_above = np.sum(sorted_pcts > thresh)
-    print(f"Percent of tiles with ground point % > {thresh}%: {pct_above:.2f} % ({count_above} counts)")
-
-
-# In[58]:
-
-
-selected = df_meta[df_meta['ground_pct'] > 0.1]
-
-# Step 2: Print info for first 5 such tiles (modify as needed)
-filename = "CAN_A01_2014_laz_5.laz"
-row = df_meta[df_meta["filename"] == filename]
-min_lat = row['min_lat']
-max_lat = row['max_lat']
-min_lon = row['min_lon']
-max_lon = row['max_lon']
-tile_area_km2 = row['tile_area_m2']*1e-6
-ground_pct = row['ground_pct']
-print(f"Filename: {filename}")
-# print(f"Bounding box: min_lat={min_lat}, max_lat={max_lat}, min_lon={min_lon}, max_lon={max_lon}, ground percentage={ground_pct*100:.2f}, tile area (m**2): {tile_area_km2:.2f}")
-print("-" * 40)
-
-# (Optional) Fetch and display/save the ESRI satellite image
-
-img = proj_satellite.fetch_esri_from_row(df_meta, filename)
-img.show()  # or save with save_path="path/to/save.jpg"
-
-
-# In[59]:
-
-
-filename
-
-
-# In[109]:
-
-
-filename = selected.iloc[5]["filename"]
-deg_dif = 0.00
-
-coords = proj_satellite.get_coords_from_df(selected, filename)
-min_lat, max_lat, min_lon, max_lon = coords
-min_lat -= deg_dif
-max_lat += deg_dif
-min_lon -= deg_dif
-max_lon += deg_dif
-coords = min_lat, max_lat, min_lon, max_lon
-
-width_m, height_m = proj_satellite.get_bbox_sides_from_coords(coords)
-area = proj_satellite.get_bbox_area_from_coords(coords)
-
-print(filename)
-print(f"Dimensions (w x h): {width_m:.0f} x {height_m:.0f}")
-print(f"Area: {area*1e-6:.2f} km**2")
-
-px_width=512
-px_height=512
-
-url = "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export"
-params = {
-    "bbox": f"{min_lon},{min_lat},{max_lon},{max_lat}",
-    "bboxSR": 4326,
-    "imageSR": 4326,
-    "size": f"{px_width},{px_height}",
-    "format": "jpg",
-    "f": "image"
+    "ground_pct_thresholds": [5, 10, 20, 30],  # percent
+    "high_ground_filter": 0.1,                 # decimal fraction
+    "esri_px_width": 512,
+    "esri_px_height": 512,
 }
-response = requests.get(url, params=params)
-response.raise_for_status()
-img = Image.open(BytesIO(response.content))
-
-plt.figure(figsize=(5,5))
-plt.imshow(img)
-plt.title(filename)
 
 
-# In[ ]:
+def get_path_to_data(data_dir, filename):
+    """Return absolute path to file in supplied directory."""
+    return os.path.join(data_dir, filename)
 
 
+def load_tile_data(data_dir, inventory_csv, metadata_csv):
+    """Load tile inventory and metadata CSVs as pandas DataFrames."""
+    df_inv = pd.read_csv(get_path_to_data(data_dir, inventory_csv))
+    df_meta = pd.read_csv(get_path_to_data(data_dir, metadata_csv))
+    return df_inv, df_meta
 
 
+def plot_ground_pct_histogram(df_meta, savefig_path=None):
+    """Plot histogram of percentage ground points in tiles."""
+    ground_pcts = (df_meta['ground_pct'] * 100).dropna()
+    plt.figure()
+    plt.hist(ground_pcts, bins=30)
+    plt.xlabel('Ground Point Percentage')
+    plt.ylabel('Number of Tiles')
+    plt.title('Distribution of % Ground Points per Tile')
+    plt.tight_layout()
+    if savefig_path:
+        plt.savefig(savefig_path)
+    else:
+        plt.show()
+
+
+def plot_ground_pct_cdf(df_meta, savefig_path=None):
+    """Plot cumulative distribution of ground percentage across tiles."""
+    ground_pcts = (df_meta['ground_pct'] * 100).dropna()
+    sorted_pcts = np.sort(ground_pcts)
+    cum_frac = np.arange(1, len(sorted_pcts) + 1) / len(sorted_pcts)
+    plt.figure(figsize=(8, 5))
+    plt.step(sorted_pcts, cum_frac, where='post')
+    plt.xlabel('Ground Points Percentage')
+    plt.ylabel('Cumulative Fraction of Tiles')
+    plt.title('Cumulative Distribution of % Ground Points per Tile')
+    plt.grid(True)
+    plt.tight_layout()
+    if savefig_path:
+        plt.savefig(savefig_path)
+    else:
+        plt.show()
+
+
+def print_threshold_stats(df_meta, thresholds):
+    """Print counts/fractions of tiles above various ground-point % thresholds."""
+    ground_pcts = (df_meta['ground_pct'] * 100).dropna()  # in percent
+    for thresh in thresholds:
+        pct_above = np.mean(ground_pcts > thresh)
+        count_above = np.sum(ground_pcts > thresh)
+        print(f"Percent of tiles with ground point % > {thresh}%: {(pct_above*100):.2f}% ({count_above} tiles)")
+
+
+def get_tile_bbox(df_meta, filename):
+    """Return bounding box (min_lat, max_lat, min_lon, max_lon) for a given tile."""
+    row = df_meta[df_meta["filename"] == filename]
+    if row.empty:
+        raise ValueError(f"{filename} not found in metadata")
+    return float(row['min_lat'].values[0]), float(row['max_lat'].values[0]), float(row['min_lon'].values[0]), float(row['max_lon'].values[0])
+
+
+def fetch_esri_satellite_by_bbox(bbox, px_width=512, px_height=512):
+    """
+    Fetch ESRI satellite image from bounding box.
+    bbox: (min_lat, max_lat, min_lon, max_lon)
+    Returns a PIL Image.
+    """
+    min_lat, max_lat, min_lon, max_lon = bbox
+    url = "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export"
+    params = {
+        "bbox": f"{min_lon},{min_lat},{max_lon},{max_lat}",
+        "bboxSR": 4326,
+        "imageSR": 4326,
+        "size": f"{px_width},{px_height}",
+        "format": "jpg",
+        "f": "image"
+    }
+    resp = requests.get(url, params=params)
+    resp.raise_for_status()
+    return Image.open(BytesIO(resp.content))
+
+
+def show_esri_image_for_tile(df_meta, filename, px_width=512, px_height=512):
+    """
+    Fetch and display ESRI satellite image for given tile filename.
+    """
+    bbox = get_tile_bbox(df_meta, filename)
+    try:
+        img = fetch_esri_satellite_by_bbox(bbox, px_width=px_width, px_height=px_height)
+        plt.figure(figsize=(5, 5))
+        plt.imshow(img)
+        plt.title(filename)
+        plt.axis('off')
+        plt.show()
+    except Exception as e:
+        print(f"ESRI server/image error for {filename}: {e}")
+
+
+def main(
+    data_dir=DEFAULT_CONFIG['data_dir'],
+    inventory_csv=DEFAULT_CONFIG['inventory_csv'],
+    metadata_csv=DEFAULT_CONFIG['metadata_csv'],
+    ground_pct_thresholds=DEFAULT_CONFIG['ground_pct_thresholds'],
+    high_ground_filter=DEFAULT_CONFIG['high_ground_filter'],
+    do_plots=True,
+    show_example_tile=True,
+    esri_px_width=DEFAULT_CONFIG['esri_px_width'],
+    esri_px_height=DEFAULT_CONFIG['esri_px_height'],
+):
+    """
+    Main analysis routine for LiDAR ground-classified point stats and ESRI image examples.
+    """
+    df_inv, df_meta = load_tile_data(data_dir, inventory_csv, metadata_csv)
+    print(f"Loaded {len(df_inv)} inventory records; {len(df_meta)} metadata records.")
+
+    if do_plots:
+        plot_ground_pct_histogram(df_meta)
+        plot_ground_pct_cdf(df_meta)
+        print_threshold_stats(df_meta, ground_pct_thresholds)
+
+    if show_example_tile:
+        df_high_ground = df_meta[df_meta['ground_pct'] > high_ground_filter]  # e.g. >10%
+        if len(df_high_ground) == 0:
+            print(f"No tiles with > {high_ground_filter*100:.1f}% ground points found.")
+            return
+        example_filename = df_high_ground.iloc[0]["filename"]
+        print(f"Example tile with high ground points: {example_filename}")
+        show_esri_image_for_tile(df_meta, example_filename, px_width=esri_px_width, px_height=esri_px_height)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='Analyze LiDAR tile ground point statistics and browse imagery.')
+
+    parser.add_argument('--data_dir', type=str, default=DEFAULT_CONFIG['data_dir'],
+                        help='Directory containing inventory/metadata CSV files.')
+    parser.add_argument('--inventory_csv', type=str, default=DEFAULT_CONFIG['inventory_csv'],
+                        help='Inventory CSV filename.')
+    parser.add_argument('--metadata_csv', type=str, default=DEFAULT_CONFIG['metadata_csv'],
+                        help='Metadata CSV filename.')
+    parser.add_argument('--ground_pct_thresholds', type=float, nargs='+',
+                        default=DEFAULT_CONFIG['ground_pct_thresholds'],
+                        help='List of ground point percent thresholds, e.g. 5 10 20 30')
+    parser.add_argument('--high_ground_filter', type=float, default=DEFAULT_CONFIG['high_ground_filter'],
+                        help='Fraction threshold for "high ground" tiles (e.g. 0.1 for 10%)')
+    parser.add_argument('--no_plots', dest='do_plots', default=True, action='store_false',
+                        help='Disable plots.')
+    parser.add_argument('--no_image', dest='show_example_tile', default=True, action='store_false',
+                        help='Disable fetching/displaying an ESRI tile.')
+    parser.add_argument('--esri_px_width', type=int, default=DEFAULT_CONFIG['esri_px_width'],
+                        help='Satellite image width (pixels)')
+    parser.add_argument('--esri_px_height', type=int, default=DEFAULT_CONFIG['esri_px_height'],
+                        help='Satellite image height (pixels)')
+
+    args = parser.parse_args()
+
+    main(
+        data_dir=args.data_dir,
+        inventory_csv=args.inventory_csv,
+        metadata_csv=args.metadata_csv,
+        ground_pct_thresholds=args.ground_pct_thresholds,
+        high_ground_filter=args.high_ground_filter,
+        do_plots=args.do_plots,
+        show_example_tile=args.show_example_tile,
+        esri_px_width=args.esri_px_width,
+        esri_px_height=args.esri_px_height
+    )
