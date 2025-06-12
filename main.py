@@ -88,13 +88,6 @@ if __name__ == "__main__":
     PDAL_PIPELINE_FILENAME = cfg["pdal_pipeline_filename"]
     PIPELINE_PATH = os.path.join(CWD, PATH_TO_PDAL_TEMPLATE_DIR, PDAL_PIPELINE_FILENAME)
 
-    # GET EARTHDATA BEARER TOKEN
-    EARTHDATA_BEARER_TOKEN = proj_io.get_earthdata_token()
-
-
-    # AUTHENTICATE EARTHACCESES
-    # proj_io.authenticate_earthaccess()
-
     # import dataset metadata into pandas dataframe
     df = pd.read_csv(PATH_TO_DATASET_METADATA)
 
