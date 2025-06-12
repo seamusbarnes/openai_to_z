@@ -74,3 +74,8 @@ log.txt
 ## Other git repos within mine that i dont want to track
 papers/
 papers/2023Kokalj/RVT_py/
+
+!data/example/
+!data/example/*
+!data/example/*.tif
+!data/example/*.laz
