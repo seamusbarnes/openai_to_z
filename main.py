@@ -4,29 +4,22 @@ main.py
 Used functions in main.py:
 
 src/config.py: Config
-src/proj_io.py: get_earthdata_token
 src/satellite.py: show_sat_image
 src/lidar.py: print_metadata_table, run_pdal_pipeline
 
 """
 
 import os
-
+import sys
 import time
 import argparse
 import pandas as pd
+import logging
+from pathlib import Path
 
 import src.config as config
 import src.satellite as satellite
 import src.lidar as lidar
-
-# helper functions
-def pt(msg=None):
-    current_time = time.strftime("%H:%M:%S")
-    if msg:
-        print(f"{current_time}: {msg}")
-    else:
-        print(current_time)
 
 def check_positive(value):
     ivalue = int(value)
@@ -34,96 +27,110 @@ def check_positive(value):
         raise argparse.ArgumentTypeError("%s is an invalid positive int value, must be >= 1" % value)
     return ivalue
 
-if __name__ == "__main__":
+def setup_logging(logfile="log.txt"):
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[%(asctime)s] %(levelname)s: %(message)s",
+        handlers=[
+            logging.FileHandler(logfile, mode='a'),
+            logging.StreamHandler(sys.stdout)
+        ]
+    )
+    logging.info("=== Pipeline run started ===")
 
-    # ARGPARSE
+if __name__ == "__main__":
+    setup_logging()
+
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "config_file", type=str, help="Path to YAML config file"
-    )
-    parser.add_argument(
-        "--show-sat", action="store_true",
-        help="Show intermediate satellite images"
-    )
-    parser.add_argument(
-        "--show-dtm", action="store_true",
-        help="Show intermediate DTM images"
-    )
-    parser.add_argument(
-        "--n-tiles",
-        type=check_positive,
-        default=1,
-        metavar="N",
-        help="Number of tiles (integer >= 1, default: 1)"
-    )
-    parser.add_argument(
-        "--print-metadata", action="store_true",
-        help="Print tile and point-cloud metadata: area, number of counts, all-point density, classification-2-point density"
-    )
-    parser.add_argument(
-        "--tile-name",
-        default=None,
-        help="Specify specific tile name (optional)"
-    )
+    parser.add_argument("config_file", type=str, help="Path to YAML config file")
+    parser.add_argument("--show-sat", action="store_true", help="Show intermediate satellite images")
+    parser.add_argument("--show-dtm", action="store_true", help="Show intermediate DTM images")
+    parser.add_argument("--n-tiles", type=check_positive, default=1, metavar="N", help="Number of tiles (integer >= 1, default: 1)")
+    parser.add_argument("--print-metadata", action="store_true", help="Print tile/point-cloud metadata")
+    parser.add_argument("--tile-name", default=None, help="Specify a specific tile (optional)")
     args = parser.parse_args()
 
-    # GET CONFIG DETAILS
-    cfg = config.Config(args.config_file)
+    try:
+        # GET CONFIG DETAILS
+        cfg = config.Config(args.config_file)
+    except Exception as e:
+        logging.error(f"Failed to load config: {e}")
+        sys.exit(1)
 
-    # SOME VARIABLES
+    # Compose all key paths
     CWD = os.getcwd()
-    PATH_TO_DATASET_METADATA = os.path.join(
-        CWD,
-        cfg["path_to_metadata"],
-        cfg["dataset_metadata_filename"]
-    )
-    LAZ_RAW_DIR = cfg["path_to_laz_raw"]
-    LAZ_PRC_DIR = cfg["path_to_laz_processed"]
-    SAT_RAW_DIR = cfg["path_to_sat"]
+    dataset_metadata_path = os.path.join(CWD, cfg["path_to_metadata"], cfg["dataset_metadata_filename"])
+    laz_raw_dir = cfg["path_to_laz_raw"]
+    sat_raw_dir = cfg["path_to_sat"]
+    dtm_dir = cfg["path_to_dtm"]
+    pipeline_template_dir = cfg["path_to_pdal_templates"]
+    pdal_pipeline_filename = cfg["pdal_pipeline_filename"]
+    pipeline_path = os.path.join(CWD, pipeline_template_dir, pdal_pipeline_filename)
 
-    DTM_DIR = cfg["path_to_dtm"]
-    VIS_DIR = cfg["path_to_vis"]
+    # Verify critical files exist
+    if not os.path.exists(dataset_metadata_path):
+        logging.error(f"Metadata file not found: {dataset_metadata_path}")
+        sys.exit(1)
+    if not os.path.exists(pipeline_path):
+        logging.error(f"PDAL pipeline file not found: {pipeline_path}")
+        sys.exit(1)
 
-    PATH_TO_PDAL_TEMPLATE_DIR = cfg["path_to_pdal_templates"]
-    PDAL_PIPELINE_FILENAME = cfg["pdal_pipeline_filename"]
-    PIPELINE_PATH = os.path.join(CWD, PATH_TO_PDAL_TEMPLATE_DIR, PDAL_PIPELINE_FILENAME)
+    try:
+        df = pd.read_csv(dataset_metadata_path)
+    except Exception as e:
+        logging.error(f"Failed to read dataset metadata: {e}")
+        sys.exit(1)
 
-    # import dataset metadata into pandas dataframe
-    df = pd.read_csv(PATH_TO_DATASET_METADATA)
+    logging.info(f"Loaded metadata: {dataset_metadata_path}, {len(df)} rows")
+    logging.info(f"Pipeline JSON: {pipeline_path}")
 
-    for index in range(args.n_tiles):
+    tiles_to_process = [args.tile_name] if args.tile_name else df["filename"].head(args.n_tiles)
 
-        # if user has chosen a specific tile-name, disregate n-tiles and process that specific tile
-        if args.tile_name:
-            print(f"User specified tile name: {args.tile_name}")
-            row = df[df["filename"] == args.tile_name]
-            if len(row) == 0:
-                raise ValueError(f"Tile name '{args.tile_name}' not found in metadata!")
-            row = row.iloc[0]
-        else:
-            row = df.iloc[index]
-        filename = row["filename"]
+    for i, tile_name in enumerate(tiles_to_process, 1):
+        try:
+            if args.tile_name:
+                row = df[df["filename"] == tile_name]
+                if len(row) == 0:
+                    logging.error(f"Tile '{tile_name}' not found in metadata!")
+                    continue
+                row = row.iloc[0]
+            else:
+                row = df[df["filename"] == tile_name].iloc[0]
+            filename = row["filename"]
+            laz_path = os.path.join(laz_raw_dir, filename)
 
-        pt(f"Processing row: {index+1}/{len(df)}; Filename: {filename}")
+            logging.info(f"Tile {i}/{len(tiles_to_process)}: {filename}")
+            logging.info(f"RAW LAZ path: {laz_path}")
 
-        laz_path = os.path.join(LAZ_RAW_DIR, filename)
-        if not os.path.exists(laz_path):
-            print(f"{filename} not yet downloaded (please be patient)")
-            print(f"skipping to next tile if n-tiles selected, or endling")
+            if not os.path.exists(laz_path):
+                logging.warning(f"{filename} not downloaded (skipping)")
+                continue
+
+            if args.show_sat:
+                satellite_img_path = Path(sat_raw_dir) / f"{Path(filename).stem}.png"
+                logging.info(f"Showing satellite image for {filename} (output: {satellite_img_path})")
+                satellite.show_sat_image(df, filename, save_path=satellite_img_path, overwrite=True)
+
+            if args.print_metadata:
+                logging.info(f"Printing metadata for {filename}")
+                lidar.print_metadata_table(laz_path, row["tile_area_m2"])
+
+            start_time = time.time()
+            output_path = lidar.run_pdal_pipeline(
+                laz_path,
+                dtm_dir,
+                pipeline_path,
+                verbose=2
+            )
+            duration = time.time() - start_time
+
+            logging.info(f"Pipeline for {filename} output: {output_path} (elapsed: {duration:.1f}s)")
+
+            if args.tile_name:
+                break
+
+        except Exception as e:
+            logging.exception(f"Error processing tile {tile_name}: {e}")
             continue
 
-        if args.show_sat:
-            satellite.show_sat_image(df, filename,save_path=SAT_RAW_DIR, overwrite=True)
-
-        if args.print_metadata:
-            lidar.print_metadata_table(laz_path, row["tile_area_m2"])
-
-        output_path = lidar.run_pdal_pipeline(
-            laz_path,
-            DTM_DIR,
-            PIPELINE_PATH,
-            verbose=2
-        )
-
-        if args.tile_name:
-            break
+    logging.info("=== Pipeline run completed ===")
