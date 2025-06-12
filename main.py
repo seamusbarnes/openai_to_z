@@ -1,13 +1,12 @@
 """
-main_v02.py
+main.py
 """
 
 import os
-import sys
+
 import time
 import argparse
 import pandas as pd
-import matplotlib.pyplot as plt
 
 import src.config as config
 import src.satellite as satellite
@@ -107,22 +106,12 @@ if __name__ == "__main__":
 
         pt(f"Processing row: {index+1}/{len(df)}; Filename: {filename}")
 
-        # laz_path = proj_io.fetch_laz_file(
-        #     filename,
-        #     LAZ_RAW_DIR,
-        #     overwrite=False,
-        #     show_progress=False,
-        #     token=EARTHDATA_BEARER_TOKEN,
-        #     verbose=True
-        # )
+        laz_path = os.path.join(LAZ_RAW_DIR, filename)
+        if not os.path.exists(laz_path):
+            print(f"{filename} not yet downloaded (please be patient)")
+            print(f"skipping to next tile if n-tiles selected, or endling")
+            continue
 
-        laz_path = proj_io.fetch_laz_file_earthaccess(
-            filename,
-            LAZ_RAW_DIR,
-            overwrite=True,
-            show_progress=False,
-            verbose=True
-        )
         if args.show_sat:
             satellite.show_sat_image(df, filename,save_path=SAT_RAW_DIR, overwrite=True)
 
