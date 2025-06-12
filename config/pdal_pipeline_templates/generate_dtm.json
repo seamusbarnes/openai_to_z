@@ -1,0 +1,29 @@
+{{
+    "pipeline": [
+      {{
+        "type": "readers.las",
+        "filename": "{in_laz}"
+      }},
+      {{
+        "type": "filters.outlier",
+        "method": "statistical",
+        "mean_k": 8,
+        "multiplier": 3.0
+      }},
+      {{
+        "type": "filters.smrf",
+        "ignore": "Classification[7:7]"
+      }},
+      {{
+        "type": "filters.expression",
+        "expression": "Classification == 2"
+      }},
+      {{
+        "filename": "{out_tif}",
+        "gdaldriver": "GTiff",
+        "output_type": "min",
+        "resolution": "2.0",
+        "type": "writers.gdal"
+      }}
+    ]
+  }}
