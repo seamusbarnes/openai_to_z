@@ -1,5 +1,13 @@
 """
 main.py
+
+Used functions in main.py:
+
+src/config.py: Config
+src/proj_io.py: get_earthdata_token
+src/satellite.py: show_sat_image
+src/lidar.py: print_metadata_table, run_pdal_pipeline
+
 """
 
 import os
@@ -10,7 +18,6 @@ import pandas as pd
 
 import src.config as config
 import src.satellite as satellite
-import src.proj_io as proj_io
 import src.lidar as lidar
 
 # helper functions
