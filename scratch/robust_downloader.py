@@ -6,7 +6,7 @@ import threading
 
 DOWNLOAD_DIR = "orders/81ce00904539eeebe5aaaa727b279567/LiDAR_Forest_Inventory_Brazil/data"
 URLS_FILE = "urls.txt"
-NUM_THREADS = 4
+NUM_THREADS = 10
 
 # Configure logging to both file and console
 logging.basicConfig(
