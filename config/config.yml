@@ -1,6 +1,6 @@
 # config/config.yml
 
-path_to_laz_raw: data/raw/laz/orders/81ce00904539eeebe5aaaa727b279567/LiDAR_Forest_Inventory_Brazil/data
+path_to_laz_raw: data/raw/laz
 path_to_laz_processed: data/processed/laz
 path_to_sat: data/raw/sat
 
