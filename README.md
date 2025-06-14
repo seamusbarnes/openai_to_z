@@ -110,3 +110,16 @@ python view_dtm.py --file data/processed/dtm/your_output.tif
 - `*.tif`, `*.png`: Example DTM rasters and visualisations.
 
 These files are sufficient to test pipeline code and visualisation tools without downloading the full dataset. BUT the `config.yml` will have to be amended to point to the .laz example file in the example directory, instead of the `data/raw/laz directory`.
+
+## To-Do
+
+### Categories
+
+- A: analysis
+- F0: feature (top-level like `main.py` or `view_dtm.py`, or utils files used directly for top-level scripts)
+- F1: feature (lower-level like `count_unique_locations.py` (not yet written) or `robust_downloader.py`)
+- R: refactor
+
+### List:
+
+- F0: Write top-level script for determining how many unique locations exist in the dataset, and how many are repeats (during different years for example) or the same location.
