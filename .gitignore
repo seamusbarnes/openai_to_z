@@ -65,6 +65,7 @@ Thumbs.db
 client_secrets.json
 mycreds.txt
 earthdata_token.txt
+.secrets.yml
 
 ######################################################################
 # 7.  Log files
