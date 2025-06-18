@@ -23,10 +23,10 @@ import multiprocessing as mp
 CWD = os.getcwd()
 
 input_dir_path = "/Users/jamesbyers/code/github/Kaggle/openai_to_z/data/processed/dtm"
-output_dir_path = CWD
+output_dir_path = "/Users/jamesbyers/code/github/Kaggle/openai_to_z/scratch/RVT/VAT_images"
 general_opacity = 50
-vat_combination_json_path = os.path.join(CWD, "papers/2023Kokalj/RVT_py/settings/blender_VAT.json")
-terrains_sett_json_path = os.path.join(CWD, "papers/2023Kokalj/RVT_py/settings/default_terrains_settings.json")
+vat_combination_json_path = os.path.join(CWD, "/Users/jamesbyers/code/github/Kaggle/openai_to_z/scratch/RVT/settings/blender_VAT.json")
+terrains_sett_json_path = os.path.join(CWD, "/Users/jamesbyers/code/github/Kaggle/openai_to_z/scratch/RVT/settings/default_terrains_settings.json")
 nr_processes = 2
 save_float = True
 save_8bit = True
@@ -36,7 +36,7 @@ save_VAT_flat = True
 print(CWD)
 
 print(vat_combination_json_path)
-print(os.path.exists("/Users/jamesbyers/code/github/Kaggle/openai_to_z/papers/2023Kokalj/RVT_py/settings/blender_VAT.json"))
+print(os.path.exists("/Users/jamesbyers/code/github/Kaggle/openai_to_z/scratch/RVT/settings/blender_VAT.json"))
 
 print(terrains_sett_json_path)
 
@@ -91,7 +91,7 @@ def combined_VAT(input_dir_path, output_dir_path, general_opacity, vat_combinati
     dem_list = os.listdir(input_dir_path)
     input_process_list = []
     for input_dem_name in dem_list:
-        if ".tif" not in input_dem_name:  # preskoči če se file ne konča .tif
+        if ".tif" not in input_dem_name or input_dem_name != "RIB_A01_2014_laz_2_fnands_openai_optimised_02.tif":  # preskoči če se file ne konča .tif
             continue
         input_dem_path = os.path.join(input_dir_path, input_dem_name)
         out_name = "{}_Archaeological_(VAT_combined)_opac{}.tif".format(input_dem_name.rstrip(".tif"), general_opacity)
