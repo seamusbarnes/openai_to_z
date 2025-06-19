@@ -17,5 +17,5 @@ path_to_pdal_templates: config/pdal_pipeline_templates
 
 # pdal_pipeline_filename: fnands.json
 # pdal_pipeline_filename: fnands_openai_optimised_01.json
-# pdal_pipeline_filename: fnands_openai_optimised_02.json
-pdal_pipeline_filename: fnands_openai_optimised_03.json
+pdal_pipeline_filename: fnands_openai_optimised_02.json
+# pdal_pipeline_filename: fnands_openai_optimised_03.json
