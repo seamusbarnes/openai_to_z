@@ -1,7 +1,0 @@
-JAC_A04_2015_laz_1.laz
-JAC_A04_2015_laz_0.laz
-JAC_A04_2015_laz_2.laz
-JAC_A04_2015_laz_3.laz
-JAC_A04_2015_laz_6.laz
-JAC_A04_2015_laz_4.laz
-JAC_A04_2015_laz_5.laz

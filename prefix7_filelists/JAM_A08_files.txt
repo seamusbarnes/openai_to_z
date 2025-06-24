@@ -1,5 +1,0 @@
-JAM_A08_2015_laz_4.laz
-JAM_A08_2015_laz_0.laz
-JAM_A08_2015_laz_1.laz
-JAM_A08_2015_laz_3.laz
-JAM_A08_2015_laz_2.laz

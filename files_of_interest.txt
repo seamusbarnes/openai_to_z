@@ -1,4 +1,0 @@
-BON_A01_2013_laz_13.laz
-BON_A01_2018_LAS_11.laz
-RIB_A01_2014_laz_2.laz
-RIB_A01_2018_LAS_11.laz

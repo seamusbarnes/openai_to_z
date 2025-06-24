@@ -1,6 +1,0 @@
-FNC_A04_2017_laz_1.laz
-FNC_A04_2017_laz_0.laz
-FNC_A04_2017_laz_2.laz
-FNC_A04_2017_laz_3.laz
-FNC_A04_2017_laz_4.laz
-FNC_A04_2017_laz_5.laz

@@ -1,2 +1,0 @@
-FNC_A01_2017_laz_1.laz
-FNC_A01_2017_laz_0.laz
