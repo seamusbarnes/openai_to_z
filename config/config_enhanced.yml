@@ -1,0 +1,24 @@
+# # config/config.yml
+
+# path_to_laz_raw: data/raw/laz
+# path_to_laz_processed: data/processed/laz
+# path_to_sat: data/raw/sat
+
+# path_to_dtm: data/processed/dtm
+# path_to_vis: data/processed/vis
+
+# path_to_metadata: data/metadata
+# path_to_examples: data/example
+
+# dataset_inventory_filename: cms_brazil_lidar_tile_inventory.csv
+# dataset_metadata_filename: cms_brazil_lidar_tile_metadata.csv
+
+# # config_enhanced.yml
+path_to_laz_enhanced: data/processed/laz/enhanced
+enhanced_filenames:
+  - enhanced_ground.laz
+
+path_to_dtm: data/processed/dtm/enhanced
+
+path_to_pdal_templates: config/pdal_pipeline_templates
+pdal_pipeline_filename: fnands_openai_optimised_04.json
