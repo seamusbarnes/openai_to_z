@@ -1,0 +1,6 @@
+FST_A07_2015_laz_5.laz
+FST_A07_2015_laz_4.laz
+FST_A07_2015_laz_3.laz
+FST_A07_2015_laz_2.laz
+FST_A07_2015_laz_0.laz
+FST_A07_2015_laz_1.laz

@@ -1,0 +1,9 @@
+MMA_A01_2017_laz_6.laz
+MMA_A01_2017_laz_7.laz
+MMA_A01_2017_laz_5.laz
+MMA_A01_2017_laz_4.laz
+MMA_A01_2017_laz_0.laz
+MMA_A01_2017_laz_1.laz
+MMA_A01_2017_laz_3.laz
+MMA_A01_2017_laz_2.laz
+MMA_A01_2017_laz_8.laz

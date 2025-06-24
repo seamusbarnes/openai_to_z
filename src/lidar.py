@@ -431,6 +431,12 @@ def run_pdal_pipeline(
         os.makedirs(output_dir, exist_ok=True)
     out_tif_path = os.path.join(output_dir, out_filename)
 
+    # SKIP IF ALREADY DONE
+    if os.path.isfile(out_tif_path):
+        if verbose:
+            print(f"Output already exists for {input_path}: {out_tif_path} (skipping)")
+        return out_tif_path
+
     pt("Reading and substituting pipeline template")
     with open(template_path, 'r', encoding='utf-8') as f:
         tpl = f.read()

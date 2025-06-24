@@ -1,0 +1,17 @@
+BAR_A01_2014_laz_11.laz
+BAR_A01_2014_laz_6.laz
+BAR_A01_2014_laz_7.laz
+BAR_A01_2014_laz_10.laz
+BAR_A01_2014_laz_12.laz
+BAR_A01_2014_laz_5.laz
+BAR_A01_2014_laz_4.laz
+BAR_A01_2014_laz_13.laz
+BAR_A01_2014_laz_0.laz
+BAR_A01_2014_laz_1.laz
+BAR_A01_2014_laz_16.laz
+BAR_A01_2014_laz_14.laz
+BAR_A01_2014_laz_3.laz
+BAR_A01_2014_laz_2.laz
+BAR_A01_2014_laz_15.laz
+BAR_A01_2014_laz_9.laz
+BAR_A01_2014_laz_8.laz

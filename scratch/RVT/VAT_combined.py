@@ -22,7 +22,7 @@ import multiprocessing as mp
 
 CWD = os.getcwd()
 
-input_dir_path = "/Users/jamesbyers/code/github/Kaggle/openai_to_z/data/processed/dtm"
+input_dir_path = "/Users/jamesbyers/code/github/Kaggle/openai_to_z/temp_dtm_dir"
 output_dir_path = "/Users/jamesbyers/code/github/Kaggle/openai_to_z/scratch/RVT/VAT_images"
 general_opacity = 50
 vat_combination_json_path = os.path.join(CWD, "/Users/jamesbyers/code/github/Kaggle/openai_to_z/scratch/RVT/settings/blender_VAT.json")
@@ -35,14 +35,14 @@ save_VAT_flat = True
 
 print(CWD)
 
-print(vat_combination_json_path)
-print(os.path.exists("/Users/jamesbyers/code/github/Kaggle/openai_to_z/scratch/RVT/settings/blender_VAT.json"))
+# print(vat_combination_json_path)
+# print(os.path.exists("/Users/jamesbyers/code/github/Kaggle/openai_to_z/scratch/RVT/settings/blender_VAT.json"))
 
-print(terrains_sett_json_path)
+# print(terrains_sett_json_path)
 
-print(os.path.exists("/Users/jamesbyers/code/github/Kaggle/openai_to_z/data/processed/denoised/SAN_A02_2014_laz_0_tutorial_denoise_ground.copc.laz"))
+# print(os.path.exists("/Users/jamesbyers/code/github/Kaggle/openai_to_z/data/processed/denoised/SAN_A02_2014_laz_0_tutorial_denoise_ground.copc.laz"))
 
-print(os.path.exists(terrains_sett_json_path))
+# print(os.path.exists(terrains_sett_json_path))
 
 def combined_VAT(input_dir_path, output_dir_path, general_opacity, vat_combination_json_path=None,
                  terrains_sett_json_path=None, nr_processes=7, save_float=True, save_8bit=False,
@@ -91,8 +91,8 @@ def combined_VAT(input_dir_path, output_dir_path, general_opacity, vat_combinati
     dem_list = os.listdir(input_dir_path)
     input_process_list = []
     for input_dem_name in dem_list:
-        if ".tif" not in input_dem_name or input_dem_name != "RIB_A01_2014_laz_2_fnands_openai_optimised_02.tif":  # preskoči če se file ne konča .tif
-            continue
+        # if ".tif" not in input_dem_name or input_dem_name != "RIB_A01_2014_laz_2_fnands_openai_optimised_02.tif":  # preskoči če se file ne konča .tif
+        #     continue
         input_dem_path = os.path.join(input_dir_path, input_dem_name)
         out_name = "{}_Archaeological_(VAT_combined)_opac{}.tif".format(input_dem_name.rstrip(".tif"), general_opacity)
         out_comb_vat_path = os.path.abspath(os.path.join(output_dir_path, out_name))

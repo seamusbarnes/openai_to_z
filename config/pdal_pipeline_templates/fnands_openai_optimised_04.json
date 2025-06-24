@@ -1,0 +1,35 @@
+{{
+    "pipeline": [
+        {{
+            "type": "readers.las",
+            "filename": "{in_laz}"
+        }},
+        {{
+            "type": "filters.outlier",
+            "method": "statistical",
+            "mean_k": 6,
+            "multiplier": 1.5
+        }},
+        {{
+            "type": "filters.smrf",
+            "scalar": 1.25,
+            "slope": 0.15,
+            "threshold": 0.5,
+            "window": 18.0
+        }},
+        {{
+            "type": "filters.range",
+            "limits": "Classification[2:2]"
+        }},
+        {{
+            "type": "writers.gdal",
+            "filename": "{out_tif}",
+            "resolution": 1.0,
+            "gdaldriver": "GTiff",
+            "output_type": "min",
+            "window_size": 5,
+            "gdalopts": ["COMPRESS=LZW"],
+            "nodata": -9999
+        }}
+    ]
+}}

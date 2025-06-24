@@ -123,3 +123,17 @@ These files are sufficient to test pipeline code and visualisation tools without
 ### List:
 
 -
+
+## BIG PROBLEMS!!!
+
+2014 good, 2018 bad
+
+- BON_A01_2013_laz_13_fnands.tif
+- BON_A01_2018_LAS_11_fnands.tif
+
+- RIB_A01_2014_laz_2_fnands.tif
+- RIB_A01_2018_LAS_11_fnands.tif
+
+proccessing .laz files with: `python main.py config/config.yml --tile-name FILENAME.laz`
+processed files in `data/processed/dtm/`
+processed .tif name format: `FILENAME_fnands_openai_optimised_02.tif`
