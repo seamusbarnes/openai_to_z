@@ -36,6 +36,11 @@ data/**
 # Local caches outside data/
 tile_cache/
 tile_cache/**
+*.png
+*.laz
+*.tif
+*.zip
+*.gpkg
 
 ######################################################################
 # 4.  Derived outputs
